@@ -3,7 +3,7 @@
 ## Desc
 SimpleRichText is a simple rich text plugin for Unity3D, based on UGUI or NGUI (you can implement custom rich text mode).
 Both UGUI and NGUI support basic rich text formats, but they are limited, this plugin is aim to enhance their rich 
-text ability (still you can get rid of UGUI or NGUI by implementing your custom rich text mode)
+text ability (still you can get rid of UGUI or NGUI by implementing your own custom rich text mode)
 
 ## Usage
 Usage is simple, below are sample codes:
