@@ -8,9 +8,7 @@ text ability (still you can get rid of UGUI or NGUI by implementing your own cus
 ## Usage
 Usage is simple, below are sample codes:
 
-1. first you need to init rich text
-
-  RichTextManager.Init(RichTextManager.Mode.UGUI);
+1. first you need to init rich text : RichTextManager.Init(RichTextManager.Mode.UGUI);
   
 2. then you could add rich elements to rich text by RichText.AddRichElement method,
    and then call RichText.Format
