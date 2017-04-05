@@ -34,8 +34,13 @@ namespace RichText
         {
             if (richText != null)
             {
+                var ret = RichTextManager.ParseRichSyntax(richSyntax, richText);
+                if (ret)
                 {
+                    richText.Format();
+                }
                 else
+                {
                     richText.ClearRichElements();
                 }
             }
