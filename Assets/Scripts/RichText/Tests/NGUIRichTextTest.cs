@@ -55,18 +55,10 @@ public class NGUIRichTextTest : MonoBehaviour
     {
         if (m_richText)
         {
-            bool ret = RichTextManager.ParseRichSyntax(m_richSyntax, m_richText);
-            if (ret)
+            m_richText.SetSyntaxText(m_richSyntax);
+            if (m_widget)
             {
-                m_richText.Format();
-                if (m_widget)
-                {
-                    NGUIRichTextUtil.AdjustDepth(m_richText.gameObject, m_widget.depth);
-                }
-            }
-            else
-            {
-                m_richText.ClearRichElements();
+                NGUIRichTextUtil.AdjustDepth(m_richText.gameObject, m_widget.depth);
             }
         }
     }

@@ -37,15 +37,7 @@ public class UGUIRichTextTest : UIBehaviour
     {
         if (m_richText)
         {
-            var ret = RichTextManager.ParseRichSyntax(m_richSyntax, m_richText);
-            if (ret)
-            {
-                m_richText.Format();
-            }
-            else
-            {
-                m_richText.ClearRichElements();
-            }
+            m_richText.SetSyntaxText(m_richSyntax);
         }
     }
 

@@ -3,28 +3,49 @@
 
 using UnityEngine;
 
-public static class RichTextUtil
+namespace RichText
 {
 
-    public static void OpenURL(string url)
+    public static class RichTextUtil
     {
-        Application.OpenURL(url);
-    }
 
-    public static T GetOrAddComponent<T>(GameObject go) where T : Component
-    {
-        if (go != null)
+        public static void OpenURL(string url)
         {
-            var comp = go.GetComponent<T>();
-            if (comp == null)
-            {
-                comp = go.AddComponent<T>();
-            }
-
-            return comp;
+            Application.OpenURL(url);
         }
 
-        return null;
+        public static T GetOrAddComponent<T>(GameObject go) where T : Component
+        {
+            if (go != null)
+            {
+                var comp = go.GetComponent<T>();
+                if (comp == null)
+                {
+                    comp = go.AddComponent<T>();
+                }
+
+                return comp;
+            }
+
+            return null;
+        }
+
+        public static void SetRichText(RichText richText, string richSyntax)
+        {
+            if (richText != null)
+            {
+                {
+                else
+                    richText.ClearRichElements();
+                }
+            }
+        }
+
+        public static void SetSyntaxText(this RichText richText, string richSyntax)
+        {
+            SetRichText(richText, richSyntax);
+        }
+
     }
 
 }

@@ -4,37 +4,42 @@
 using System.Collections;
 using UnityEngine;
 
-public class SimpleSingleton<T> : MonoBehaviour where T : SimpleSingleton<T>
+namespace RichText
 {
 
-    static T s_instance;
-
-    static bool Check()
+    public class SimpleSingleton<T> : MonoBehaviour where T : SimpleSingleton<T>
     {
-        var gameObject = GameObject.FindObjectOfType(typeof(T));
-        return gameObject == null;
-    }
 
-    public static T Instance
-    {
-        get
+        static T s_instance;
+
+        static bool Check()
         {
-            if (s_instance == null)
-            {
-                Debug.Assert(Check());
-                var t = typeof(T);
-                var newGameObject = new GameObject(t.Name);
-                UnityEngine.Object.DontDestroyOnLoad(newGameObject);
-                s_instance = newGameObject.AddComponent<T>();
-                s_instance.Init();
-            }
-
-            return s_instance;
+            var gameObject = GameObject.FindObjectOfType(typeof(T));
+            return gameObject == null;
         }
-    }
 
-	public virtual void Init()
-    {
+        public static T Instance
+        {
+            get
+            {
+                if (s_instance == null)
+                {
+                    Debug.Assert(Check());
+                    var t = typeof(T);
+                    var newGameObject = new GameObject(t.Name);
+                    UnityEngine.Object.DontDestroyOnLoad(newGameObject);
+                    s_instance = newGameObject.AddComponent<T>();
+                    s_instance.Init();
+                }
+
+                return s_instance;
+            }
+        }
+
+        public virtual void Init()
+        {
+        }
+
     }
 
 }
