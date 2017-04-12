@@ -19,4 +19,4 @@ Usage is simple, below are sample codes:
 Please check example scenes under [ProjectRoot]/Scenes : test_rich_text_ugui and test_rich_text_ngui
 
 ## Notice
-We do not support NGUI mode by default, you can enable it by adding RICH_TEXT_ENABLE_NGUI macro symbol.
+We do not support **NGUI** mode by default, you can enable it by adding **RICH_TEXT_ENABLE_NGUI** macro symbol.
