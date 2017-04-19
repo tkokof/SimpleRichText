@@ -4,6 +4,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using RichText;
 
 public static class UGUIUtil
 {
@@ -78,24 +79,52 @@ public static class UGUIUtil
     }
     */
 
-    public static void CreateTextUnderline(Text text)
+    public static void CreateTextUnderline(GameObject textGO)
     {
         // now we just add underline component
-        if (text)
+        if (textGO != null)
         {
-            text.gameObject.AddComponent<UGUITextUnderline>();
+            textGO.AddComponent<UGUITextUnderline>();
         }
     }
 
-    public static void DestroyTextUnderline(Text text)
+    public static void DestroyTextUnderline(GameObject textGO)
     {
         // now we just destroy underline component
-        if (text)
+        if (textGO != null)
         {
-            var underlineComp = text.GetComponent<UGUITextUnderline>();
-            if (underlineComp)
+            var underlineComp = textGO.GetComponent<UGUITextUnderline>();
+            if (underlineComp != null)
             {
                 Object.DestroyImmediate(underlineComp);
+            }
+        }
+    }
+
+    public static void CreateAnimationImage(GameObject imageGO, string imagePrefix, uint imageCount, float animFPS)
+    {
+        if (imageGO != null)
+        {
+            var animationComp = imageGO.AddComponent<UGUIAnimationImage>();
+
+            animationComp.ImagePrefix = imagePrefix;
+            animationComp.ImageCount = imageCount;
+            if (animFPS <= 0)
+            {
+                animFPS = 30;
+            }
+            animationComp.AnimInterval = 1 / animFPS;
+        }
+    }
+
+    public static void DestroyAnimationImage(GameObject imageGO)
+    {
+        if (imageGO != null)
+        {
+            var animationComp = imageGO.GetComponent<UGUIAnimationImage>();
+            if (animationComp != null)
+            {
+                Object.DestroyImmediate(animationComp);
             }
         }
     }

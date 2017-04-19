@@ -99,7 +99,7 @@ namespace RichText
             return m_imagePrefab;
         }
 
-        Sprite GetImageSprite(string spriteName)
+        public Sprite GetImageSprite(string spriteName)
         {
             if (!m_imageSpriteMap.ContainsKey(spriteName))
             {
@@ -117,8 +117,7 @@ namespace RichText
         public GameObject CreateImage(string imageName, Action clickHandler)
         {
             var imagePrefab = GetImagePrefab();
-            var imageSprite = GetImageSprite(imageName);
-            if (imagePrefab && imageSprite)
+            if (imagePrefab)
             {
                 var imageGO = m_imagePool.Spawn(imagePrefab);
                 var imageComp = imageGO.GetComponent<Image>();
@@ -129,8 +128,8 @@ namespace RichText
                     return null;
                 }
 
-                imageComp.sprite = imageSprite;
-
+                imageComp.sprite = GetImageSprite(imageName);
+                
                 // NOTE not so sure about this ...
                 imageComp.type = Image.Type.Simple;
                 imageComp.preserveAspect = true;

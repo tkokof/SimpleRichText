@@ -100,6 +100,21 @@ namespace RichText
             return defaultValue;
         }
 
+        public uint GetParamUInt(string paramName, uint defaultValue = 0)
+        {
+            var paramValue = GetParam(paramName);
+            if (!string.IsNullOrEmpty(paramValue))
+            {
+                uint uintValue = default(uint);
+                if (uint.TryParse(paramValue, out uintValue))
+                {
+                    return uintValue;
+                }
+            }
+
+            return defaultValue;
+        }
+
         public float GetParamFloat(string paramName, float defaultValue = 0)
         {
             var paramValue = GetParam(paramName);
@@ -109,6 +124,21 @@ namespace RichText
                 if (float.TryParse(paramValue, out floatValue))
                 {
                     return floatValue;
+                }
+            }
+
+            return defaultValue;
+        }
+
+        public double GetParamDouble(string paramName, double defaultValue = 0)
+        {
+            var paramValue = GetParam(paramName);
+            if (!string.IsNullOrEmpty(paramValue))
+            {
+                double doubleValue = default(double);
+                if (double.TryParse(paramValue, out doubleValue))
+                {
+                    return doubleValue;
                 }
             }
 

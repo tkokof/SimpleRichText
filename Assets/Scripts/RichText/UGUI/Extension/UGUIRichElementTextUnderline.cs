@@ -30,20 +30,16 @@ namespace RichText
         public override GameObject Create(string text, string style, Action clickHandler)
         {
             var textGO = base.Create(text, style, clickHandler);
-            if (textGO)
-            {
-                var textComp = textGO.GetComponent<Text>();
-                UGUIUtil.CreateTextUnderline(textComp);
-            }
+            UGUIUtil.CreateTextUnderline(textGO);
 
             return textGO;
         }
 
         public override void Destroy(RichElement element, GameObject gameObject)
         {
-            if (gameObject)
+            if (gameObject != null)
             {
-                UGUIUtil.DestroyTextUnderline(gameObject.GetComponent<Text>());
+                UGUIUtil.DestroyTextUnderline(gameObject);
                 base.Destroy(element, gameObject);
             }
         }
