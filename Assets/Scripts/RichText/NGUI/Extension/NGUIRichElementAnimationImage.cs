@@ -1,18 +1,17 @@
-// desc simple implementation of ugui animation image
+// desc simple implementation of ngui animation image
 // maintainer hugoyu
 
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace RichText
 {
 
-    public class UGUIRichElementAnimationImage: UGUIRichElementImage
+    public class NGUIRichElementAnimationImage : NGUIRichElementImage
     {
 
-        public UGUIRichElementAnimationImage(string imagePrefix, Action clickHandler, uint imageCount, float animFPS)
+        public NGUIRichElementAnimationImage(string imagePrefix, Action clickHandler, uint imageCount, float animFPS)
             : base(imagePrefix, clickHandler)
         {
             m_imageCount = imageCount;
@@ -21,7 +20,7 @@ namespace RichText
 
         public override RichElementProxy CreateElementProxy()
         {
-            return new UGUIRichElementAnimationImageProxy();
+            return new NGUIRichElementAnimationImageProxy();
         }
 
         public uint GetImageCount()
@@ -39,7 +38,7 @@ namespace RichText
 
     }
 
-    public class UGUIRichElementAnimationImageProxy : UGUIRichElementImageProxy
+    public class NGUIRichElementAnimationImageProxy : NGUIRichElementImageProxy
     {
 
         public override GameObject Create(RichElement element)
@@ -47,10 +46,10 @@ namespace RichText
             var imageGO = base.Create(element);
             if (imageGO != null)
             {
-                var animationImage = element as UGUIRichElementAnimationImage;
+                var animationImage = element as NGUIRichElementAnimationImage;
                 Debug.Assert(animationImage != null);
 
-                UGUIUtil.CreateAnimationImage(imageGO, animationImage.GetImage(), animationImage.GetImageCount(), animationImage.GetAnimFPS());
+                NGUIRichTextUtil.CreateAnimationImage(imageGO, animationImage.GetImage(), animationImage.GetImageCount(), animationImage.GetAnimFPS());
             }
 
             return imageGO;
@@ -60,7 +59,7 @@ namespace RichText
         {
             if (gameObject)
             {
-                UGUIUtil.DestroyAnimationImage(gameObject);
+                NGUIRichTextUtil.DestroyAnimationImage(gameObject);
                 base.Destroy(element, gameObject);
             }
         }

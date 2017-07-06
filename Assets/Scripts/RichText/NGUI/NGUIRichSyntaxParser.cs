@@ -30,6 +30,7 @@ namespace RichText
                 { "break", OnBreakSyntax },
                 { "br", OnBreakSyntax },
                 { "image", OnImageSyntax },
+                { "animimage", OnAnimImageSyntax },
                 { "underline", OnUnderlineBeginSyntax },
                 { "u", OnUnderlineBeginSyntax },
                 { "/underline", OnUnderlineEndSyntax },
@@ -126,6 +127,17 @@ namespace RichText
             return new NGUIRichElementImageSizeable(image, openURLHandler, size);
         }
 
+        protected NGUIRichElementAnimationImage CreateAnimImageElement(string image, string url, uint count, float fps)
+        {
+            Action openURLHandler = null;
+            if (!string.IsNullOrEmpty(url))
+            {
+                openURLHandler = () => { RichTextUtil.OpenURL(url); };
+            }
+
+            return new NGUIRichElementAnimationImage(image, openURLHandler, count, fps);
+        }
+
         protected override void OnText(string text)
         {
             if (m_richText)
@@ -176,6 +188,17 @@ namespace RichText
                 {
                     m_richText.AddRichElement(CreateImageElement(image, m_url));
                 }
+            }
+        }
+
+        protected void OnAnimImageSyntax(RichSyntaxData syntaxData)
+        {
+            if (m_richText)
+            {
+                var imagePrefix = syntaxData.GetParamString("name");
+                var imageCount = syntaxData.GetParamUInt("count");
+                var animFPS = syntaxData.GetParamFloat("fps", 30);
+                m_richText.AddRichElement(CreateAnimImageElement(imagePrefix, m_url, imageCount, animFPS));
             }
         }
 
