@@ -5,6 +5,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+#if RICH_TEXT_ENABLE_NGUI
+
 namespace RichText
 {
 
@@ -68,3 +70,5 @@ namespace RichText
 
 
 }
+
+#endif
