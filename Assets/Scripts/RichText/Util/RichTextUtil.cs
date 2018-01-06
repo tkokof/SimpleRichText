@@ -30,6 +30,18 @@ namespace RichText
             return null;
         }
 
+        public static void DestroyComponent<T>(GameObject go) where T : Component
+        {
+            if (go != null)
+            {
+                var comp = go.GetComponent<T>();
+                if (comp != null)
+                {
+                    Object.Destroy(comp);
+                }
+            }
+        }
+
         public static void SetRichText(RichText richText, string richSyntax)
         {
             if (richText != null)

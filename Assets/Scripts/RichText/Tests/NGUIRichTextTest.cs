@@ -10,7 +10,7 @@ public class NGUIRichTextTest : MonoBehaviour
 #if RICH_TEXT_ENABLE_NGUI
 
     [SerializeField]
-    string m_richSyntax = "用以测试的<u><url|value=www.baidu.com>RichText</u><br>This is RichText Test<image|name=Test1.sprite_2></url><break><style|value=red_20>Text<style|value=yellow_24><image|name=Test1.sprite_3><image|name=Test1.sprite_3|size=8,8><image|name=Test1.sprite_3|size=32,64>文本";
+    string m_richSyntax = "this is a <u><url|value=www.google.com><style|value=yellow_24>Test RichText </u><image|name=Test1.smile|size=64,64></url><image|name=Test1.heart|size=64,64></url><style|value=default>~<br>";
     [SerializeField]
     UIWidget m_widget = null;
     [SerializeField]
@@ -29,9 +29,11 @@ public class NGUIRichTextTest : MonoBehaviour
             }
             else
             {
-                m_richText.SetTextWidth(128);
+                m_richText.SetTextWidth(512);
                 m_richText.SetVerticalSpace(8);
             }
+
+            Generate();
         }
     }
 

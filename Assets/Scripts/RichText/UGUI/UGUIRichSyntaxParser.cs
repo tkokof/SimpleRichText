@@ -104,6 +104,17 @@ namespace RichText
             return new UGUIRichElementImage(image, openURLHandler);
         }
 
+        protected UGUIRichElementImage CreateImageSizeableElement(string image, string url, Vector2 size)
+        {
+            Action openURLHandler = null;
+            if (!string.IsNullOrEmpty(url))
+            {
+                openURLHandler = () => { RichTextUtil.OpenURL(url); };
+            }
+
+            return new UGUIRichElementImageSizeable(image, openURLHandler, size);
+        }
+
         protected UGUIRichElementAnimationImage CreateAnimImageElement(string image, string url, uint count, float fps)
         {
             Action openURLHandler = null;
@@ -156,7 +167,15 @@ namespace RichText
             if (m_richText)
             {
                 var image = syntaxData.GetParamString("name");
-                m_richText.AddRichElement(CreateImageElement(image, m_url));
+                Debug.Assert(image != null);
+                if (syntaxData.HasParam("size"))
+                {
+                    m_richText.AddRichElement(CreateImageSizeableElement(image, m_url, syntaxData.GetParamVector2("size")));
+                }
+                else
+                {
+                    m_richText.AddRichElement(CreateImageElement(image, m_url));
+                }
             }
         }
 

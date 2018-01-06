@@ -1,4 +1,4 @@
-﻿// desc rich text element sizeable image
+﻿// desc simple implementation of ngui sizeable image
 // maintainer hugoyu
 
 #if RICH_TEXT_ENABLE_NGUI

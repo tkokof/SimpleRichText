@@ -1,11 +1,11 @@
 // desc simple implementation of ngui animation image
 // maintainer hugoyu
 
+#if RICH_TEXT_ENABLE_NGUI
+
 using System;
 using System.Collections;
 using UnityEngine;
-
-#if RICH_TEXT_ENABLE_NGUI
 
 namespace RichText
 {
