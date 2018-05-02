@@ -28,3 +28,7 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# ignore NGUI plugin
+Assets/NGUI.meta
+Assets/NGUI/

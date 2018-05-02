@@ -29,6 +29,7 @@ public class UGUIRichTextTest : UIBehaviour
                 var size = m_rectTransform.rect.size;
                 m_richText.SetTextWidth(size.x);
                 m_richText.SetVerticalSpace(8);
+                m_richText.SetPivot(RichText.RichTextPivot.Center);
 
                 Generate();
             }

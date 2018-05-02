@@ -26,11 +26,13 @@ public class NGUIRichTextTest : MonoBehaviour
             {
                 m_richText.SetTextWidth(m_widget.width);
                 m_richText.SetVerticalSpace(8);
+                m_richText.SetPivot(RichText.RichTextPivot.Center);
             }
             else
             {
                 m_richText.SetTextWidth(512);
                 m_richText.SetVerticalSpace(8);
+                m_richText.SetPivot(RichText.RichTextPivot.Center);
             }
 
             Generate();

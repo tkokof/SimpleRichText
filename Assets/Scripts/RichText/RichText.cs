@@ -8,8 +8,30 @@ using UnityEngine;
 namespace RichText
 {
 
+    public enum RichTextPivot
+    {
+        TopLeft,
+        Top,
+        TopRight,
+        Left,
+        Center,
+        Right,
+        BottomLeft,
+        Bottom,
+        BottomRight,
+    }
+
     public class RichText : MonoBehaviour
     {
+
+        void Awake()
+        {
+            if (m_pivotTransform == null)
+            {
+                Debug.LogError("[RichText]Error to get pivot transform, use rich text transform instead ...");
+                m_pivotTransform = transform;
+            }
+        }
 
         public virtual void AddRichElement(RichElement element)
         {
@@ -81,17 +103,19 @@ namespace RichText
                 }
             }
 
-            Debug.Assert(transform.childCount == 0);
+            Debug.Assert(m_pivotTransform.childCount == 0);
         }
 
         // NOTE not so sure about this ...
-        public virtual void ResetFormat()
+        protected virtual void ResetFormat()
         {
             DestroyChildren();
 
-            m_leftWidth = m_textWidth;
-            m_textHeight = 0;
-            m_maxHeight = 0;
+            m_lineLeftWidth = m_textWidth;
+            m_textDrawWidth = 0;
+            m_textDrawHeight = 0;
+            m_lineMaxWidth = 0;
+            m_lineMaxHeight = 0;
             m_renderPos = Vector3.zero;
         }
 
@@ -133,9 +157,14 @@ namespace RichText
                     }
                 }
             }
+
+            if (handleRet)
+            {
+                HandlePivot();
+            }
         }
 
-        void AddElementRenderer(RichElement element, GameObject renderer)
+        protected void AddElementRenderer(RichElement element, GameObject renderer)
         {
             if (m_richElementRenderers.ContainsKey(element))
             {
@@ -150,7 +179,7 @@ namespace RichText
         // NOTE now we always anchor of game object is at the top-left,
         //      also we assume rich text anchor is at the top-left
         // TODO improve
-        bool HandleTextRecur(string text, string style, Action clickHandler, RichElementText element, RichElementTextProxy proxy)
+        protected bool HandleTextRecur(string text, string style, Action clickHandler, RichElementText element, RichElementTextProxy proxy)
         {
             // param check
             if (string.IsNullOrEmpty(text))
@@ -158,7 +187,7 @@ namespace RichText
                 return true;
             }
 
-            if (m_leftWidth <= 0)
+            if (m_lineLeftWidth <= 0)
             {
                 HandleNewline();
             }
@@ -171,21 +200,23 @@ namespace RichText
             }
 
             // NOTE we need to add it to textGO immediately for retrieving correct size
-            textGO.transform.SetParent(transform, false);
+            textGO.transform.SetParent(m_pivotTransform, false);
             AddElementRenderer(element, textGO);
 
             var size = proxy.GetSize(textGO);
 
-            if (size.x < m_leftWidth)
+            if (size.x < m_lineLeftWidth)
             {
                 // enough width space, just add game object
                 textGO.transform.localPosition = m_renderPos;
 
                 // update control data
-                var oldMaxHeight = m_maxHeight;
-                m_maxHeight = size.y > m_maxHeight ? size.y : m_maxHeight;
-                m_textHeight = m_textHeight - oldMaxHeight + m_maxHeight;
-                m_leftWidth -= size.x;
+                var oldMaxHeight = m_lineMaxHeight;
+                m_lineMaxHeight = size.y > m_lineMaxHeight ? size.y : m_lineMaxHeight;
+                m_textDrawHeight = m_textDrawHeight - oldMaxHeight + m_lineMaxHeight;
+                m_lineMaxWidth += size.x;
+                m_textDrawWidth = m_lineMaxWidth > m_textDrawWidth ? m_lineMaxWidth : m_textDrawWidth;
+                m_lineLeftWidth -= size.x;
                 m_renderPos += new Vector3(size.x, 0, 0);
 
                 return true;
@@ -193,14 +224,14 @@ namespace RichText
             else
             {
                 // not enough space, have to adjust
-                float factor = m_leftWidth / size.x;
+                float factor = m_lineLeftWidth / size.x;
                 int subStrLength = Mathf.FloorToInt(factor * text.Length);
                 if (subStrLength <= 0)
                 {
                     HandleNewline();
 
                     // recalculate sub string length
-                    factor = m_leftWidth / size.x;
+                    factor = m_lineLeftWidth / size.x;
                     factor = Mathf.Min(factor, 1);
                     subStrLength = Mathf.FloorToInt(factor * text.Length);
 
@@ -220,7 +251,7 @@ namespace RichText
 
                 // check width after adjust text
                 var adjustSize = proxy.GetSize(textGO);
-                if (adjustSize.x > m_leftWidth)
+                if (adjustSize.x > m_lineLeftWidth)
                 {
                     // still out of width
                     for (int i = subStrLength - 1; i > 0; --i)
@@ -228,7 +259,7 @@ namespace RichText
                         subStr = text.Substring(0, i);
                         proxy.SetText(textGO, subStr);
                         adjustSize = proxy.GetSize(textGO);
-                        if (adjustSize.x <= m_leftWidth)
+                        if (adjustSize.x <= m_lineLeftWidth)
                         {
                             break;
                         }
@@ -242,7 +273,7 @@ namespace RichText
                         subStr = text.Substring(0, i);
                         proxy.SetText(textGO, subStr);
                         adjustSize = proxy.GetSize(textGO);
-                        if (adjustSize.x > m_leftWidth)
+                        if (adjustSize.x > m_lineLeftWidth)
                         {
                             // roll back
                             subStr = text.Substring(0, i - 1);
@@ -257,16 +288,18 @@ namespace RichText
 
                 // update control data
                 m_renderPos += new Vector3(adjustSize.x, 0, 0);
-                var oldMaxHeight = m_maxHeight;
-                m_maxHeight = size.y > m_maxHeight ? size.y : m_maxHeight;
-                m_textHeight = m_textHeight - oldMaxHeight + m_maxHeight;
-                m_leftWidth -= adjustSize.x;
+                var oldMaxHeight = m_lineMaxHeight;
+                m_lineMaxHeight = size.y > m_lineMaxHeight ? size.y : m_lineMaxHeight;
+                m_textDrawHeight = m_textDrawHeight - oldMaxHeight + m_lineMaxHeight;
+                m_lineMaxWidth += adjustSize.x;
+                m_textDrawWidth = m_lineMaxWidth > m_textDrawWidth ? m_lineMaxWidth : m_textDrawWidth;
+                m_lineLeftWidth -= adjustSize.x;
 
                 return HandleTextRecur(text.Substring(subStr.Length, text.Length - subStr.Length), style, clickHandler, element, proxy);
             }
         }
 
-        bool HandleText(RichElementText element, RichElementTextProxy proxy)
+        protected bool HandleText(RichElementText element, RichElementTextProxy proxy)
         {
             if (proxy != null)
             {
@@ -276,7 +309,7 @@ namespace RichText
             return false;
         }
 
-        bool HandleImage(RichElementImage element, RichElementImageProxy proxy)
+        protected bool HandleImage(RichElementImage element, RichElementImageProxy proxy)
         {
             if (proxy != null)
             {
@@ -288,7 +321,7 @@ namespace RichText
                     return true;
                 }
 
-                if (m_leftWidth <= 0)
+                if (m_lineLeftWidth <= 0)
                 {
                     HandleNewline();
                 }
@@ -301,7 +334,7 @@ namespace RichText
                 }
 
                 // NOTE we need to add it to imageGO immediately for retrieving correct size
-                imageGO.transform.SetParent(transform, false);
+                imageGO.transform.SetParent(m_pivotTransform, false);
                 AddElementRenderer(element, imageGO);
 
                 var imageSize = proxy.GetSize(imageGO);
@@ -314,23 +347,28 @@ namespace RichText
                     Debug.LogWarning("[RichText]Incorrect to handle rich text here, seems width is too small or image size is too large ...");
                     // we reset image size here
                     // NOTE not so sure about this ...
-                    imageSize.x = m_textWidth;
+                    //imageSize.x = m_textWidth;
                 }
 
-                if (imageSize.x > m_leftWidth)
+                if (imageSize.x > m_lineLeftWidth)
                 {
-                    HandleNewline();
-                    Debug.Assert(imageSize.x <= m_leftWidth);
+                    if (imageSize.x <= m_textWidth)
+                    {
+                        HandleNewline();
+                    }
+                    //Debug.Assert(imageSize.x <= m_lineLeftWidth);
                 }
                 
                 imageGO.transform.localPosition = m_renderPos;
 
                 // update control data
                 m_renderPos += new Vector3(imageSize.x, 0, 0);
-                var oldMaxHeight = m_maxHeight;
-                m_maxHeight = imageSize.y > m_maxHeight ? imageSize.y : m_maxHeight;
-                m_textHeight = m_textHeight - oldMaxHeight + m_maxHeight;
-                m_leftWidth -= imageSize.x;
+                var oldMaxHeight = m_lineMaxHeight;
+                m_lineMaxHeight = imageSize.y > m_lineMaxHeight ? imageSize.y : m_lineMaxHeight;
+                m_textDrawHeight = m_textDrawHeight - oldMaxHeight + m_lineMaxHeight;
+                m_lineMaxWidth += imageSize.x;
+                m_textDrawWidth = m_lineMaxWidth > m_textDrawWidth ? m_lineMaxWidth : m_textDrawWidth;
+                m_lineLeftWidth -= imageSize.x;
 
                 return true;
             }
@@ -338,7 +376,7 @@ namespace RichText
             return false;
         }
 
-        bool HandleCustom(RichElementCustom element, RichElementCustomProxy proxy)
+        protected bool HandleCustom(RichElementCustom element, RichElementCustomProxy proxy)
         {
             if (proxy != null)
             {
@@ -350,7 +388,7 @@ namespace RichText
                     return true;
                 }
 
-                if (m_leftWidth <= 0)
+                if (m_lineLeftWidth <= 0)
                 {
                     HandleNewline();
                 }
@@ -363,7 +401,7 @@ namespace RichText
                 }
 
                 // NOTE we need to add it to customGO immediately for retrieving correct size
-                customGO.transform.SetParent(transform, false);
+                customGO.transform.SetParent(m_pivotTransform, false);
                 AddElementRenderer(element, customGO);
 
                 var customSize = proxy.GetSize(customGO);
@@ -372,23 +410,28 @@ namespace RichText
                     Debug.LogWarning("[RichText]Incorrect to handle rich text here, seems width is too small or custom size is too large ...");
                     // we reset custom size here
                     // NOTE not so sure about this ...
-                    customSize.x = m_textWidth;
+                    //customSize.x = m_textWidth;
                 }
 
-                if (customSize.x > m_leftWidth)
+                if (customSize.x > m_lineLeftWidth)
                 {
-                    HandleNewline();
-                    Debug.Assert(customSize.x <= m_leftWidth);
+                    if (customSize.x <= m_textWidth)
+                    {
+                        HandleNewline();
+                    }
+                    //Debug.Assert(customSize.x <= m_lineLeftWidth);
                 }
 
                 customGO.transform.localPosition = m_renderPos;
 
                 // update control data
                 m_renderPos += new Vector3(customSize.x, 0, 0);
-                var oldMaxHeight = m_maxHeight;
-                m_maxHeight = customSize.y > m_maxHeight ? customSize.y : m_maxHeight;
-                m_textHeight = m_textHeight - oldMaxHeight + m_maxHeight;
-                m_leftWidth -= customSize.x;
+                var oldMaxHeight = m_lineMaxHeight;
+                m_lineMaxHeight = customSize.y > m_lineMaxHeight ? customSize.y : m_lineMaxHeight;
+                m_textDrawHeight = m_textDrawHeight - oldMaxHeight + m_lineMaxHeight;
+                m_lineMaxWidth += customSize.x;
+                m_textDrawWidth = m_lineMaxWidth > m_textDrawWidth ? m_lineMaxWidth : m_textDrawWidth;
+                m_lineLeftWidth -= customSize.x;
 
                 return true;
             }
@@ -396,12 +439,12 @@ namespace RichText
             return false;
         }
 
-        bool HandleNewline()
+        protected bool HandleNewline()
         {
-            m_renderPos = new Vector3(0, m_renderPos.y - m_maxHeight - m_verticalSpace, 0);
-            m_leftWidth = m_textWidth;
-            m_textHeight += m_verticalSpace;
-            m_maxHeight = 0;
+            m_renderPos = new Vector3(0, m_renderPos.y - m_lineMaxHeight - m_verticalSpace, 0);
+            m_lineLeftWidth = m_textWidth;
+            m_textDrawHeight += m_verticalSpace;
+            m_lineMaxHeight = 0;
 
             return true;
         }
@@ -426,17 +469,77 @@ namespace RichText
             m_verticalSpace = space;
         }
 
-        public virtual float GetTextHeight()
+        public virtual float GetTextDrawWidth()
         {
-            return m_textHeight;
+            return m_textDrawWidth;
         }
 
-        protected float m_leftWidth;
-        protected float m_maxHeight;
+        public virtual float GetTextDrawHeight()
+        {
+            return m_textDrawHeight;
+        }
+
+        protected void HandlePivot()
+        {
+            switch (m_pivot)
+            {
+                case RichTextPivot.TopLeft:
+                    m_pivotTransform.localPosition = Vector3.zero;
+                    break;
+                case RichTextPivot.Top:
+                    m_pivotTransform.localPosition = new Vector3(-m_textDrawWidth * 0.5f, 0, 0);
+                    break;
+                case RichTextPivot.TopRight:
+                    m_pivotTransform.localPosition = new Vector3(-m_textDrawWidth, 0, 0);
+                    break;
+                case RichTextPivot.Left:
+                    m_pivotTransform.localPosition = new Vector3(0, m_textDrawHeight * 0.5f, 0);
+                    break;
+                case RichTextPivot.Center:
+                    m_pivotTransform.localPosition = new Vector3(-m_textDrawWidth * 0.5f, m_textDrawHeight * 0.5f, 0);
+                    break;
+                case RichTextPivot.Right:
+                    m_pivotTransform.localPosition = new Vector3(-m_textDrawWidth, m_textDrawHeight * 0.5f, 0);
+                    break;
+                case RichTextPivot.BottomLeft:
+                    m_pivotTransform.localPosition = new Vector3(0, m_textDrawHeight, 0);
+                    break;
+                case RichTextPivot.Bottom:
+                    m_pivotTransform.localPosition = new Vector3(-m_textDrawWidth * 0.5f, m_textDrawHeight, 0);
+                    break;
+                case RichTextPivot.BottomRight:
+                    m_pivotTransform.localPosition = new Vector3(-m_textDrawWidth, m_textDrawHeight, 0);
+                    break;
+            }
+        }
+
+        public void SetPivot(RichTextPivot pivot)
+        {
+            if (m_pivot != pivot)
+            {
+                m_pivot = pivot;
+                HandlePivot();
+            }
+        }
+
+        public RichTextPivot GetPivot()
+        {
+            return m_pivot;
+        }
+
+        protected float m_lineLeftWidth;
+        protected float m_lineMaxWidth;
+        protected float m_lineMaxHeight;
         protected Vector3 m_renderPos;
 
+        [SerializeField]
+        protected Transform m_pivotTransform;
+        [SerializeField]
+        protected RichTextPivot m_pivot = RichTextPivot.TopLeft;
+
         protected float m_textWidth;
-        protected float m_textHeight;
+        protected float m_textDrawWidth;
+        protected float m_textDrawHeight;
         protected float m_verticalSpace;
         protected List<RichElement> m_richElements = new List<RichElement>();
         protected Dictionary<RichElement, List<GameObject>> m_richElementRenderers = new Dictionary<RichElement, List<GameObject>>();
