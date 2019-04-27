@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace RichText
 {
-
     public enum RichTextPivot
     {
         TopLeft,
@@ -23,14 +22,10 @@ namespace RichText
 
     public class RichText : MonoBehaviour
     {
-
         void Awake()
         {
-            if (m_pivotTransform == null)
-            {
-                Debug.LogError("[RichText]Error to get pivot transform, use rich text transform instead ...");
-                m_pivotTransform = transform;
-            }
+            // create pivot transform
+            CreatePivot();
         }
 
         public virtual void AddRichElement(RichElement element)
@@ -479,6 +474,14 @@ namespace RichText
             return m_textDrawHeight;
         }
 
+        protected void CreatePivot()
+        {
+            RichTextUtil.ReleaseGameObject(m_pivotTransform);
+            var pivotGO = RichTextUtil.CreateGameObject("Pivot", gameObject);
+            Debug.Assert(pivotGO != null);
+            m_pivotTransform = pivotGO.transform;
+        }
+
         protected void HandlePivot()
         {
             switch (m_pivot)
@@ -532,7 +535,6 @@ namespace RichText
         protected float m_lineMaxHeight;
         protected Vector3 m_renderPos;
 
-        [SerializeField]
         protected Transform m_pivotTransform;
         [SerializeField]
         protected RichTextPivot m_pivot = RichTextPivot.TopLeft;
@@ -543,7 +545,5 @@ namespace RichText
         protected float m_verticalSpace;
         protected List<RichElement> m_richElements = new List<RichElement>();
         protected Dictionary<RichElement, List<GameObject>> m_richElementRenderers = new Dictionary<RichElement, List<GameObject>>();
-
     }
-
 }
